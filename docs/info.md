@@ -11,12 +11,12 @@ run the testbench provided
 
 ## How it works
 
-It runs on a clocks and usese a video sency generator and outputs RGB as 222
-Explain how your project works
+CLock based design. Clk is used to generate video sync, and x, y are calculated
+and hardware generaters RGB from a rom and moves is around.
 
 ## How to test
 
-Explain how to use your project
+Run the test provided by TT
 
 ## External hardware
 
