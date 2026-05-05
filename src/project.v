@@ -1,16 +1,11 @@
+// vim: ts=4:
 /*
  * Copyright (c) 2024 Tiny Tapeout LTD
  * SPDX-License-Identifier: Apache-2.0
- * Author: Uri Shaked
+ * Author: Eric Pearson
  */
 
 `default_nettype none
-
-parameter LOGO_SIZE = 128;  // Size of the logo in pixels
-parameter DISPLAY_WIDTH = 640;  // VGA display width
-parameter DISPLAY_HEIGHT = 480;  // VGA display height
-
-`define COLOR_WHITE 3'd7
 
 module tt_um_eric_lcc (
     input  wire [7:0] ui_in,    // Dedicated inputs
@@ -23,115 +18,49 @@ module tt_um_eric_lcc (
     input  wire       rst_n     // reset_n - low to reset
 );
 
-  // VGA signals
-  wire hsync;
-  wire vsync;
-  reg [1:0] R;
-  reg [1:0] G;
-  reg [1:0] B;
-  wire video_active;
-  wire [9:0] pix_x;
-  wire [9:0] pix_y;
+  	// Unused outputs assigned to 0.
+  	assign uio_out = 0;
+  	assign uio_oe  = 0;
+	assign uo_out[7] = 0;
+	
+  	// Suppress unused signals warning
+  	wire _unused_ok = &{ena, ui_in[7:5], uio_in};
 
-  // Configuration
-  wire cfg_tile = ui_in[0];
-  wire cfg_color = ui_in[1];
 
-  // TinyVGA PMOD
-  assign uo_out  = {hsync, B[0], G[0], R[0], vsync, B[1], G[1], R[1]};
+	// ADC Scale parameters
+	parameter ADC_VOLTS_PER_DN = 0.2005;
+	parameter ADC_DN_PER_AMP = 205;
+	// Physical parameters
+	parameter CLOCK_FREQ_MHZ = 48;  // 48 or 24 Mhz
+	parameter COIL_IND_UH = 390;
+	
+	forge_launcher #( ADC_VOLTS_PER_DN, ADC_DN_PER_AMP, CLOCK_FREQ_MHZ, COIL_IND_UH ) i_chip (
+		// System
+		.clk			( clk ),
+		.reset			( !rst_n),
+		// Front Panel
+		.fire_button 	( !ui_in[0] ),
+		.arm_led 		( uo_out[0] ),
+		.cont_led	 	( uo_out[1] ),
+		.speaker 		( uo_out[2] ),
+		// High Voltage
+		.lt3420_charge 	( uo_out[3] ),
+		.lt3420_done   	( 1'b0  ),
+		.pwm           	( uo_out[4] ),
+		.dump			( uo_out[5] ),
+		// ADC interface
+		.ad_cs			( uo_out[6] ),
+		.ad_s_iout		( ui_in[2] ),
+		.ad_s_vout		( ui_in[3] ),
+		.ad_s_vcap		( ui_in[4] ),
+		.neg_iout		( 1'b0 ),
+		.neg_vout		( 1'b0 ),
+		.neg_vcap		( 1'b0 ),
+		// Tie off Debug inputs
+		.auto_mode		( 1'b1 ),
+		.use_est		( 1'b1 ),
+		.mute			( !ui_in[1] ),
+		.key			( 5'b00000 )
+    );
 
-  // Unused outputs assigned to 0.
-  assign uio_out = 0;
-  assign uio_oe  = 0;
-
-  // Suppress unused signals warning
-  wire _unused_ok = &{ena, ui_in[7:1], uio_in};
-
-  reg [9:0] prev_y;
-
-  hvsync_generator vga_sync_gen (
-      .clk(clk),
-      .reset(~rst_n),
-      .hsync(hsync),
-      .vsync(vsync),
-      .display_on(video_active),
-      .hpos(pix_x),
-      .vpos(pix_y)
-  );
-
-  reg [9:0] logo_left;
-  reg [9:0] logo_top;
-  reg dir_x;
-  reg dir_y;
-
-  wire pixel_value;
-  reg [2:0] color_index;
-  wire [5:0] color;
-
-  wire [9:0] x = pix_x - logo_left;
-  wire [9:0] y = pix_y - logo_top;
-  wire logo_pixels = cfg_tile || (x[9:7] == 0 && y[9:7] == 0);
-
-  bitmap_rom rom1 (
-      .x(x[6:0]),
-      .y(y[6:0]),
-      .pixel(pixel_value)
-  );
-
-  palette palette_inst (
-      .color_index(cfg_color ? color_index : `COLOR_WHITE),
-      .rrggbb(color)
-  );
-
-  // RGB output logic
-  always @(posedge clk) begin
-    if (~rst_n) begin
-      R <= 0;
-      G <= 0;
-      B <= 0;
-    end else begin
-      R <= 0;
-      G <= 0;
-      B <= 0;
-      if (video_active && logo_pixels) begin
-        R <= pixel_value ? color[5:4] : 0;
-        G <= pixel_value ? color[3:2] : 0;
-        B <= pixel_value ? color[1:0] : 0;
-      end
-    end
-  end
-
-  // Bouncing logic
-  always @(posedge clk) begin
-    if (~rst_n) begin
-      logo_left <= 200;
-      logo_top <= 200;
-      dir_y <= 0;
-      dir_x <= 1;
-      color_index <= 0;
-    end else begin
-      prev_y <= pix_y;
-      if (pix_y == 0 && prev_y != pix_y) begin
-        logo_left <= logo_left + (dir_x ? 1 : -1);
-        logo_top  <= logo_top + (dir_y ? 1 : -1);
-        if (logo_left - 1 == 0 && !dir_x) begin
-          dir_x <= 1;
-          color_index <= color_index + 1;
-        end
-        if (logo_left + 1 == DISPLAY_WIDTH - LOGO_SIZE && dir_x) begin
-          dir_x <= 0;
-          color_index <= color_index + 1;
-        end
-        if (logo_top - 1 == 0 && !dir_y) begin
-          dir_y <= 1;
-          color_index <= color_index + 1;
-        end
-        if (logo_top + 1 == DISPLAY_HEIGHT - LOGO_SIZE && dir_y) begin
-          dir_y <= 0;
-          color_index <= color_index + 1;
-        end
-      end
-    end
-  end
-
-endmodule
+endmodule 
