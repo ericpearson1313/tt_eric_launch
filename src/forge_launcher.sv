@@ -539,11 +539,79 @@ always_ff @(posedge clk) deltav[12:0] <= { vcap_corr[11], vcap_corr[11:0] } - { 
 
 // Use table lookup on &msbs of deltaV to calc deltai
 logic [15:0] deltai_rom[63:0];// rom deltaI units in (4.12)
-always_comb begin
-	for( int ii = 0; ii < 64; ii++ )
-/* verilator lint_off REALCVT */
-		deltai_rom[ii] = ( (ii * 32 + 16) * 4096 * ADC_VOLTS_PER_DN * ADC_DN_PER_AMP ) / ( CLOCK_FREQ_MHZ * COIL_IND_UH );
-/* verilator lint_on REALCVT */
+//always_comb begin
+//	for( int ii = 0; ii < 64; ii++ ) begin
+///* verilator lint_off REALCVT */
+//		deltai_rom[ii] = ( (ii * 32 + 16) * 4096 * ADC_VOLTS_PER_DN * ADC_DN_PER_AMP ) / ( CLOCK_FREQ_MHZ * COIL_IND_UH );
+//		$display("deltai_rom[%0d]=12'd%0d;", ii, deltai_rom[ii]);
+///* verilator lint_on REALCVT */
+//	end
+//end
+initial begin
+deltai_rom[0]=12'd144;
+deltai_rom[1]=12'd432;
+deltai_rom[2]=12'd719;
+deltai_rom[3]=12'd1007;
+deltai_rom[4]=12'd1295;
+deltai_rom[5]=12'd1583;
+deltai_rom[6]=12'd1871;
+deltai_rom[7]=12'd2158;
+deltai_rom[8]=12'd2446;
+deltai_rom[9]=12'd2734;
+deltai_rom[10]=12'd3022;
+deltai_rom[11]=12'd3310;
+deltai_rom[12]=12'd3597;
+deltai_rom[13]=12'd3885;
+deltai_rom[14]=12'd4173;
+deltai_rom[15]=12'd4461;
+deltai_rom[16]=12'd4748;
+deltai_rom[17]=12'd5036;
+deltai_rom[18]=12'd5324;
+deltai_rom[19]=12'd5612;
+deltai_rom[20]=12'd5900;
+deltai_rom[21]=12'd6187;
+deltai_rom[22]=12'd6475;
+deltai_rom[23]=12'd6763;
+deltai_rom[24]=12'd7051;
+deltai_rom[25]=12'd7339;
+deltai_rom[26]=12'd7626;
+deltai_rom[27]=12'd7914;
+deltai_rom[28]=12'd8202;
+deltai_rom[29]=12'd8490;
+deltai_rom[30]=12'd8778;
+deltai_rom[31]=12'd9065;
+deltai_rom[32]=12'd9353;
+deltai_rom[33]=12'd9641;
+deltai_rom[34]=12'd9929;
+deltai_rom[35]=12'd10216;
+deltai_rom[36]=12'd10504;
+deltai_rom[37]=12'd10792;
+deltai_rom[38]=12'd11080;
+deltai_rom[39]=12'd11368;
+deltai_rom[40]=12'd11655;
+deltai_rom[41]=12'd11943;
+deltai_rom[42]=12'd12231;
+deltai_rom[43]=12'd12519;
+deltai_rom[44]=12'd12807;
+deltai_rom[45]=12'd13094;
+deltai_rom[46]=12'd13382;
+deltai_rom[47]=12'd13670;
+deltai_rom[48]=12'd13958;
+deltai_rom[49]=12'd14245;
+deltai_rom[50]=12'd14533;
+deltai_rom[51]=12'd14821;
+deltai_rom[52]=12'd15109;
+deltai_rom[53]=12'd15397;
+deltai_rom[54]=12'd15684;
+deltai_rom[55]=12'd15972;
+deltai_rom[56]=12'd16260;
+deltai_rom[57]=12'd16548;
+deltai_rom[58]=12'd16836;
+deltai_rom[59]=12'd17123;
+deltai_rom[60]=12'd17411;
+deltai_rom[61]=12'd17699;
+deltai_rom[62]=12'd17987;
+deltai_rom[63]=12'd18275;
 end
 
 logic [15:0] deltai;
