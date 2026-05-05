@@ -69,10 +69,34 @@ async def test_project(dut):
         await ClockCycles(dut.clk, 1)
     cocotb.log.info("PWM negedge seen")
 
-    # wait some time and then assert burn through
-    await Timer(40, unit="ms")
+    # wait 5ms then sample 2A
+    await Timer(5, unit="ms")
+    assert int(dut.ad_iout.value) > 300 
+    assert int(dut.ad_iout.value) < 500 
+    cocotb.log.info("2Amp seen");
+
+    # wait 10ms then sample 4A
+    await Timer(10, unit="ms")
+    assert int(dut.ad_iout.value) > 600 
+    assert int(dut.ad_iout.value) < 1000 
+    cocotb.log.info("4 Amp seen");
+
+    # wait 10ms then sample 6A
+    await Timer(10, unit="ms")
+    assert int(dut.ad_iout.value) > 900 
+    assert int(dut.ad_iout.value) < 1500 
+    cocotb.log.info("6 Amp seen");
+
+    # wait 10ms then sample 8A
+    await Timer(10, unit="ms")
+    assert int(dut.ad_iout.value) > 1200 
+    assert int(dut.ad_iout.value) < 2000 
+    cocotb.log.info("8 Amp seen");
+
+    # wait 5ms (total wait 40ms) some time and then assert burn through
+    await Timer(5, unit="ms")
     cocotb.log.info("gniter Burn Through")
-    dut.ui_in.value[7] = 1
+    dut.ui_in.value = 131
 
     # wait and test remaining energy in cap
     await Timer(1, unit="ms")

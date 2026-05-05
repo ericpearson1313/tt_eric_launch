@@ -331,8 +331,12 @@ assign vcap = ( ad_vcap[11] || ad_vcap[10:4] == 0 ) ? 11'b0 : ( ad_vcap[10:0] );
 
 
 always_ff @( posedge clk ) begin
+  if( reset ) begin
+	cap_charged <= 0;
+  end else begin
 	cap_charged <= ( ad_strobe && vcap > (( 310 * 10000 ) / 2005 ) ) ? 1'b1 :
 	               ( ad_strobe && vcap < (( 50  * 10000 ) / 2005 ) ) ? 1'b0 : cap_charged;
+  end
 end
 
 always_ff @(posedge clk)
@@ -449,10 +453,14 @@ always_ff @(posedge clk)
 // Data input shift regisers MSB first
 reg [3:0][11:0] ad_sreg;
 always_ff @(posedge clk) begin
+  if( reset ) begin
+	ad_sreg <= 0;
+  end else begin
 		ad_sreg[0] <= { ad_sreg[0][10:0], ad_ireg[0] };
 		ad_sreg[1] <= { ad_sreg[1][10:0], ad_ireg[1] };
 		ad_sreg[2] <= { ad_sreg[2][10:0], ad_ireg[2] };
 		ad_sreg[3] <= { ad_sreg[3][10:0], ad_ireg[3] };
+  end
 end
 
 // Data hold registers
@@ -461,9 +469,12 @@ always_ff @(posedge clk)
 	ad_hold_en <= ( sample_div == HOLD_SEL ) ? 1'b1 : 1'b0;
 logic [3:0][11:0] ad_hold;
 always_ff @(posedge clk) 
+  if( reset ) begin
+	ad_hold <= 0;
+  end else begin
 	for( int ii =  0; ii < 4; ii++ ) 
 		ad_hold[ii] <= ( ad_hold_en ) ? ad_sreg[ii] : ad_hold[ii];
-	
+  end
 // ad_strobe reg
 always_ff @(posedge clk) ad_strobe <= ad_hold_en;
 

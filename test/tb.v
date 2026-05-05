@@ -101,7 +101,7 @@ module tb ();
 	// sim pad register of CS
     logic cs_ireg;
     always @(posedge !clk)
-        cs_ireg <= uo_out[6];
+        cs_ireg <= ( !rst_n ) ? 0 : uo_out[6];
 
  	// synthesisiable ADC models to feed system data into LCC
     logic [3:0] m_ad_out;
@@ -115,9 +115,15 @@ module tb ();
 
 	// sim out pad output reg for data
     always_ff @(posedge !clk) begin
+	  if( !rst_n ) begin
+        adc_iout <= 0;
+        adc_vout <= 0;
+        adc_vcap <= 0;
+	  end else begin
         adc_iout <= m_ad_out[0];
         adc_vout <= m_ad_out[1];
         adc_vcap <= m_ad_out[2];
+	  end
     end
 
 
