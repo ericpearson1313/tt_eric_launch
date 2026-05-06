@@ -9,7 +9,7 @@ You can also include images in this folder and reference them in the markdown. E
 
 ## How it works
 
-![overview](https://github.com/ericpearson1313/launch_control_chip/blob/main/lcc_ds_draft_1.png)
+![overview](lcc_ds_draft_1.png)
 
 This chip is the core for a complete system for a
 capacitive discharge model rocket launch controllers. It provides
@@ -46,7 +46,7 @@ For electrical testing I use am FPGA board with the same system and ADC models i
 
 ## External hardware
 
-![system](https://github.com/ericpearson1313/launch_control_chip/blob/main/lcc_ds_draft_2.png)
+![overview](lcc_ds_draft_2.png)
 
 List external hardware used:
 	- 3 channels of 12 bit ADC simultaneous sampleing at 3Mhz
