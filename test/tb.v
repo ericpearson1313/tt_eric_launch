@@ -2,6 +2,10 @@
 `default_nettype none
 `timescale 1ns / 1ps
 
+`ifdef GL_TEST
+`include "lcc_syssim.sv"
+`endif
+
 /* This testbench just instantiates the module and makes some convenient wires
    that can be driven / tested by the cocotb test.py.
 */
