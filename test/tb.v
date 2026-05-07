@@ -28,6 +28,20 @@ module tb ();
   wire VGND = 1'b0;
 `endif
 
+  // sim test signals fed into DUT
+  logic adc_vout, adc_vcap, adc_iout; // in lieu of ui_in[4:2]
+  logic charge, pwm, dump, arm_led, cont_led, speaker;
+  logic ad_cs, fire_n, mute_n;
+  assign arm_led = uo_out[0];
+  assign cont_led= uo_out[1];
+  assign speaker = uo_out[2];
+  assign charge  = uo_out[3];
+  assign pwm	 = uo_out[4];
+  assign dump	 = uo_out[5];
+  assign ad_cs 	 = uo_out[6];
+  assign fire_n  = ui_in[0];
+  assign mute_n  = ui_in[1];
+
   // Replace tt_um_example with your module name:
   tt_um_eric_lcc user_project (
 
@@ -37,7 +51,7 @@ module tb ();
       .VGND(VGND),
 `endif
 
-      .ui_in  (ui_in),    // Dedicated inputs
+      .ui_in  ({ui_in[7:5], adc_vcap, adc_vout, adc_iout, ui_in[1:0]} ),    // Dedicated inputs
       .uo_out (uo_out),   // Dedicated outputs
       .uio_in (uio_in),   // IOs: Input path
       .uio_out(uio_out),  // IOs: Output path
@@ -47,4 +61,73 @@ module tb ();
       .rst_n  (rst_n)     // not reset
   );
 
+ // add the integer system model used on test stand fpga
+ // scale down R,C and increate the charge rate to shorted sim
+ // syssim monitors the dut outputs simulates the system and provides state
+
+	logic [11:0] ad_iout, ad_vout, ad_icap, ad_vcap, ad_ecap;
+    lcc_syssim #(
+        .ADC_VOLTS_PER_DN   ( 0.2005 ),
+        .ADC_DN_PER_AMP     ( 205 ),
+        .ADC_DN_PER_JOULE   ( 205 ), 
+        .CLOCK_FREQ_MHZ     ( 48 ),
+        .COIL_UH            ( 390.0 ),
+        .CAP_UF             ( 200.0 ), // normally 200.0, 
+        .CH_RATE            ( 50.0 ), // normally 2.5 J/s
+        .CH_INIT            ( 1900 ), // start energy, almost full, take 3ms to charge
+        .R_DUMP             ( 300.0 ), // normally 3k3
+        .R                  ( 10.0 ) // resistance ohms
+    ) i_intsim (
+        .clk    ( clk ),
+        .reset  ( !rst_n ),
+        // hardware power control signals
+        .charge ( uo_out[3] ),
+        .pwm    ( uo_out[4] ),
+        .dump   ( uo_out[5] ),
+        // virtual simulaiton inputs
+        .burn   ( ui_in[6] ), // sim control not used by hardware
+        // ADC outputs
+        .ad_iout    ( ad_iout ),  // eventual sys_sim[2] ), 
+        .ad_vout    ( ad_vout ),  // eventual sys_sim[3] ),
+        .ad_vcap    ( ad_vcap ),  // eventual sys_sim[4] ),
+        // Monitoring outputs
+        .ad_icap    ( ad_icap ),
+        .ad_ecap    ( ad_ecap )
+    );
+
+
+   	/////////////////////
+    // AD7352 Model     
+    /////////////////////
+
+	// sim pad register of CS
+    logic cs_ireg;
+    always @(posedge !clk)
+        cs_ireg <= ( !rst_n ) ? 0 : uo_out[6];
+
+ 	// synthesisiable ADC models to feed system data into LCC
+    logic [3:0] m_ad_out;
+    lcc_adcsim i_adcsim(
+        .clk( !clk ),
+        .reset( !rst_n ),
+        .ad_in( { 12'd0, ad_vcap, ad_vout, ad_iout } ),
+        .ad_out( m_ad_out[3:0] ),
+        .ad_cs( cs_ireg )
+    );
+
+	// sim out pad output reg for data
+    always_ff @(posedge !clk) begin
+	  if( !rst_n ) begin
+        adc_iout <= 0;
+        adc_vout <= 0;
+        adc_vcap <= 0;
+	  end else begin
+        adc_iout <= m_ad_out[0];
+        adc_vout <= m_ad_out[1];
+        adc_vcap <= m_ad_out[2];
+	  end
+    end
+
+
 endmodule
+

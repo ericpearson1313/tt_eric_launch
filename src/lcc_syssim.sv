@@ -103,7 +103,7 @@ module lcc_syssim #(
 
 	// Cap Energy to voltage rom
 	logic [11:0] vcap_rom [63:0]; // unsigned 6 MSBs as input
-	always_comb begin
+	initial	begin
 vcap_rom[0] = 12'd139;
 vcap_rom[1] = 12'd241;
 vcap_rom[2] = 12'd312;

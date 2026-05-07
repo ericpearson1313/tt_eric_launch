@@ -44,7 +44,6 @@ module tt_um_eric_lcc (
 	parameter CLOCK_FREQ_MHZ = 48;  // 48 or 24 Mhz
 	parameter COIL_IND_UH = 390;
 	
-	assign duo_out[7] = 1'b0;
 	forge_launcher #( ADC_VOLTS_PER_DN, ADC_DN_PER_AMP, CLOCK_FREQ_MHZ, COIL_IND_UH ) i_chip (
 		// System
 		.clk			( clk ),
