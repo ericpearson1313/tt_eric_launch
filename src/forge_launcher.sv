@@ -543,7 +543,7 @@ logic [15:0] deltai_rom[63:0];// rom deltaI units in (4.12)
 //	for( int ii = 0; ii < 64; ii++ ) begin
 ///* verilator lint_off REALCVT */
 //		deltai_rom[ii] = ( (ii * 32 + 16) * 4096 * ADC_VOLTS_PER_DN * ADC_DN_PER_AMP ) / ( CLOCK_FREQ_MHZ * COIL_IND_UH );
-//		$display("deltai_rom[%0d]=12'd%0d;", ii, deltai_rom[ii]);
+//		$display("deltai_rom[%0d]=16'd%0d;", ii, deltai_rom[ii]);
 ///* verilator lint_on REALCVT */
 //	end
 //end
