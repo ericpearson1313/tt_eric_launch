@@ -80,12 +80,12 @@ module tt_um_eric_lcc (
         .ADC_DN_PER_AMP     ( 205 ),
         .ADC_DN_PER_JOULE   ( 205 ),
         .CLOCK_FREQ_MHZ     ( 48 ),
-		.COIL_UH            ( 390 ),
-		.CAP_UF             ( 200 ), // normally 200.0, 
-		.CH_RATE            ( 50 ), // normally 2.5 J/s
+        .COIL_UH            ( 390.0 ),
+        .CAP_UF             ( 200.0 ), // normally 200.0, 
+        .CH_RATE            ( 50.0 ), // normally 2.5 J/s
         .CH_INIT            ( 1900 ), // start energy, almost full, take 3ms to charge
-        .R_DUMP             ( 300 ), // normally 3k3
-		.R                  ( 10 ) // resistance ohm
+        .R_DUMP             ( 300.0 ), // normally 3k3
+        .R                  ( 10.0 ) // resistance ohms
     ) i_intsim (
         .clk    ( clk ),
         .reset  ( !rst_n ),

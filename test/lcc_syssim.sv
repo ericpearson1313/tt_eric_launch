@@ -87,11 +87,19 @@ module lcc_syssim #(
 	// 16777216.0 = (1<<24)
 	// 65536.0 = (1<<16)
 
-	localparam ADC_CHARGE_PER_CYCLE = int'(( 268435456.0 * ADC_DN_PER_JOULE * CH_RATE ) / ( 1000000.0 * CLOCK_FREQ_MHZ ));
-	localparam ADC_DUMP_CONST = int'(( 268435456.0 * 512.0 ) / ( R_DUMP * CAP_UF * CLOCK_FREQ_MHZ ));
-	localparam ADC_COIL_CONST = int'(( 16777216.0 * ADC_VOLTS_PER_DN * ADC_DN_PER_AMP   ) / ( COIL_UH * CLOCK_FREQ_MHZ ));
-	localparam ADC_CAP_CONST  = int'(( 268435456.0 * 512.0 * ADC_VOLTS_PER_DN * ADC_DN_PER_JOULE ) / ( 1000000.0 * ADC_DN_PER_AMP * CLOCK_FREQ_MHZ));
-	localparam ADC_OUT_CONST  = int'(( 65536.0 *  R ) / ( ADC_DN_PER_AMP * ADC_VOLTS_PER_DN ));
+	localparam [15:0] ADC_CHARGE_PER_CYCLE = int'(( 268435456.0 * ADC_DN_PER_JOULE * CH_RATE ) / ( 1000000.0 * CLOCK_FREQ_MHZ ));
+	localparam [17:0] ADC_DUMP_CONST = int'(( 268435456.0 * 512.0 ) / ( R_DUMP * CAP_UF * CLOCK_FREQ_MHZ ));
+	localparam [15:0] ADC_COIL_CONST = int'(( 16777216.0 * ADC_VOLTS_PER_DN * ADC_DN_PER_AMP   ) / ( COIL_UH * CLOCK_FREQ_MHZ ));
+	localparam [15:0] ADC_CAP_CONST  = int'(( 268435456.0 * 512.0 * ADC_VOLTS_PER_DN * ADC_DN_PER_JOULE ) / ( 1000000.0 * ADC_DN_PER_AMP * CLOCK_FREQ_MHZ));
+	localparam [15:0] ADC_OUT_CONST  = int'(( 65536.0 *  R ) / ( ADC_DN_PER_AMP * ADC_VOLTS_PER_DN ));
+
+//initial begin
+//	$display("ADC_CHARGE_PER_CYCLE = %d", ADC_CHARGE_PER_CYCLE);
+//	$display("ADC_DUMP_CONST = %d", ADC_DUMP_CONST);
+//	$display("ADC_COIL_CONST = %d", ADC_COIL_CONST);
+//	$display("ADC_CAP_CONST = %d", ADC_CAP_CONST);
+//	$display("ADC_OUT_CONST = %d", ADC_OUT_CONST);
+//end
 
 	// Cap Energy to voltage rom
 	logic [11:0] vcap_rom [63:0]; // unsigned 6 MSBs as input
@@ -177,24 +185,31 @@ vcap_rom[63] = 12'd1570;
 		end else if( dump ) begin
 			iout <= 40'd0;
 			vout <= 12'd0;
-			ecap <= ecap - ((ecap[39-:12] * ADC_DUMP_CONST)>>9);
+			//ecap <= ecap - ((ecap[39-:12] * ADC_DUMP_CONST)>>9);
+			ecap <= ecap - ((ecap[39-:12] * 47722)>>9);
 		end else if( charge ) begin
 			iout <= 40'd0;
 			vout <= 12'd0;
-			ecap <= ecap + ADC_CHARGE_PER_CYCLE;
+			//ecap <= ecap + ADC_CHARGE_PER_CYCLE;
+			ecap <= ecap + 57322;
 		end else if( burn ) begin
 			iout <= 40'd0;
 			vout <= 12'h7FF; // max V flyback
 			ecap <= ecap;
 		end else if( pwm ) begin
 	//$display("ecap %x vcap %x, iout %x, VI %x, dE %x",ecap, vcap, iout, (24'd1 * vcap * iout[39-:12]), ((( 24'd1 * vcap * iout[39-:12] ) * ADC_CAP_CONST)>>9) );
-			iout <= iout + ((( vcap - vout ) * ADC_COIL_CONST)<<4 ) ;
-			ecap <= ecap - ((( 24'd1 * vcap * iout[39-:12] ) * ADC_CAP_CONST)>>9);
-			vout <= ( iout[39-:12] * ADC_OUT_CONST ) >> 16;
+			//iout <= iout + ((( vcap - vout ) * ADC_COIL_CONST)<<4 ) ;
+			iout <= iout + ((( vcap - vout ) * 36837)<<4 ) ;
+			//ecap <= ecap - ((( 24'd1 * vcap * iout[39-:12] ) * ADC_CAP_CONST)>>9);
+			ecap <= ecap - ((( 24'd1 * vcap * iout[39-:12] ) * 574)>>9);
+			//vout <= ( iout[39-:12] * ADC_OUT_CONST ) >> 16;
+			vout <= ( iout[39-:12] * 15945) >> 16;
 		end else /* !pwm */ begin
-			iout <= iout - (( vout * ADC_COIL_CONST )<<4);
+			//iout <= iout - (( vout * ADC_COIL_CONST )<<4);
+			iout <= iout - (( vout * 36837)<<4);
 			ecap <= ecap;
-			vout <= ( iout[39-:12] * ADC_OUT_CONST ) >> 16;
+			//vout <= ( iout[39-:12] * ADC_OUT_CONST ) >> 16;
+			vout <= ( iout[39-:12] * 15945) >> 16;
 		end 
 	end
 
