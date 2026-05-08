@@ -158,13 +158,13 @@ module tt_um_eric_lcc (
 	assign burn = ( test_cnt >= 56*48000 ) ? 1'b1 : 1'b0;
 
 	// Sample the output currents at 2, 4, 6, 8 amps
-	assign exit_flag[0] = ( test_cnt == 20*48000 && ( ad_iout < 300 || ad_iout > 500 ) ) ? 1'b1 : 1'b0;
-	assign exit_flag[1] = ( test_cnt == 30*48000 && ( ad_iout < 700 || ad_iout > 900 ) ) ? 1'b1 : 1'b0;
-	assign exit_flag[2] = ( test_cnt == 40*48000 && ( ad_iout < 900 || ad_iout >1200 ) ) ? 1'b1 : 1'b0;
-	assign exit_flag[3] = ( test_cnt == 50*48000 && ( ad_iout <1300 || ad_iout >1500 ) ) ? 1'b1 : 1'b0;
+	assign exit_flag[0] = ( test_cnt[21-:8] > 8'h30 && test_cnt[21-:8] < 8'h49 && ( ad_iout < 300 || ad_iout > 500 ) ) ? 1'b1 : 1'b0;
+	assign exit_flag[1] = ( test_cnt[21-:8] > 8'h50 && test_cnt[21-:8] < 8'h69 && ( ad_iout < 700 || ad_iout > 900 ) ) ? 1'b1 : 1'b0;
+	assign exit_flag[2] = ( test_cnt[21-:8] > 8'h70 && test_cnt[21-:8] < 8'h89 && ( ad_iout <1000 || ad_iout >1200 ) ) ? 1'b1 : 1'b0;
+	assign exit_flag[3] = ( test_cnt[21-:8] > 8'h90 && test_cnt[21-:8] < 8'hA1 && ( ad_iout <1325 || ad_iout >1525 ) ) ? 1'b1 : 1'b0;
 
 	// Measure final values of cap voltage at 57ms
-	assign exit_flag[4] = ( test_cnt == 57*48000 && ( ad_vcap < 300 || ad_vcap > 400 ) ) ? 1'b1 : 1'b0;
+	assign exit_flag[4] = ( test_cnt == 57*48000 && ad_vcap != 369 ) ? 1'b1 : 1'b0;
 
 	// The exit criteria is determiend by counter and a state comparison
 
