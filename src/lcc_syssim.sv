@@ -182,7 +182,7 @@ vcap_rom[63] = 12'd1570;
 			iout <= 40'd0;
 			vout <= 12'd0;
 			ecap <= ((CH_INIT)<<(40-12));
-		end else if( dump ) begin
+		end else if( dump & 0 ) begin
 			iout <= 40'd0;
 			vout <= 12'd0;
 			//ecap <= ecap - ((ecap[39-:12] * ADC_DUMP_CONST)>>9);
