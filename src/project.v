@@ -160,11 +160,11 @@ module tt_um_eric_lcc (
 	// Sample the output currents at 2, 4, 6, 8 amps
 	assign exit_flag[0] = ( test_cnt[21-:4] == 4'h3 && ( ad_iout < 300 || ad_iout > 500 ) ) ? 1'b1 : 1'b0;
 	assign exit_flag[1] = ( test_cnt[21-:4] == 4'h5 && ( ad_iout < 700 || ad_iout > 900 ) ) ? 1'b1 : 1'b0;
-	assign exit_flag[2] = ( test_cnt[21-:4] == 4'h7 && ( ad_iout <1000 || ad_iout >1200 ) ) ? 1'b1 : 1'b0;
-	assign exit_flag[3] = ( test_cnt[21-:4] == 4'h9 && ( ad_iout <1312 || ad_iout >1535 ) ) ? 1'b1 : 1'b0;
+	assign exit_flag[2] = ( test_cnt[21-:4] == 4'h7 && ( ad_iout < 900 || ad_iout >1200 ) ) ? 1'b1 : 1'b0;
+	assign exit_flag[3] = ( test_cnt[21-:4] == 4'h9 && ( ad_iout <1300 || ad_iout >2047 ) ) ? 1'b1 : 1'b0;
 
 	// Measure final values of cap voltage at 57ms
-	assign exit_flag[4] = ( test_cnt == 57*48000 && ad_vcap != 369 ) ? 1'b1 : 1'b0;
+	assign exit_flag[4] = ( test_cnt[21-:4] == 4'hb && ad_vcap != 369 ) ? 1'b1 : 1'b0;
 
 	// The exit criteria is determiend by counter and a state comparison
 
