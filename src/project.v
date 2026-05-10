@@ -161,7 +161,7 @@ module tt_um_eric_lcc (
 	assign exit_flag[0] = ( test_cnt[21-:4] == 4'h3 && ( ad_iout < 300 || ad_iout > 500 ) ) ? 1'b1 : 1'b0;
 	assign exit_flag[1] = ( test_cnt[21-:4] == 4'h5 && ( ad_iout < 700 || ad_iout > 900 ) ) ? 1'b1 : 1'b0;
 	assign exit_flag[2] = ( test_cnt[21-:4] == 4'h7 && ( ad_iout < 900 || ad_iout >1200 ) ) ? 1'b1 : 1'b0;
-	assign exit_flag[3] = ( test_cnt == 50*48000 && ( ad_iout <1300 || ad_iout >1500 ) ) ? 1'b1 : 1'b0;
+	assign exit_flag[3] = ( test_cnt[21-:4] == 4'h9 && ( ad_iout[11-:3] == 3'b011 ) ) ? 1'b1 : 1'b0; // 1280-1536
 
 	// Measure final values of cap voltage at 57ms
 	assign exit_flag[4] = ( test_cnt == 57*48000 && ( ad_vcap[11-:7] != 7'b0001011 ) ) ? 1'b1 : 1'b0; // 352 to 283 valid
